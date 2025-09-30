@@ -103,10 +103,10 @@ Tworzy nową płatność w systemie Paynow.
 Pobiera aktualny status płatności.
 
 ##### `verifyNotification(signature: string, data: string): boolean`
-Weryfikuje podpis powiadomienia od Paynow.
+Weryfikuje podpis powiadomienia webhook od Paynow. Używa prostego HMAC-SHA256 dla body.
 
 ##### `parseNotification(data: string): PaymentNotification`
-Parsuje dane powiadomienia od Paynow.
+Parsuje dane powiadomienia od Paynow do typowanej struktury.
 
 ### Typy danych
 
@@ -177,6 +177,27 @@ export enum PaymentStatus {
   EXPIRED = 'EXPIRED',
   ABANDONED = 'ABANDONED',
 }
+```
+
+## 🔐 Bezpieczeństwo i Podpisy
+
+Biblioteka automatycznie obsługuje podpisywanie żądań zgodnie z wymaganiami Paynow:
+
+### API Requests (createPayment)
+- Używa złożonego schematu z posortowanymi headers, parameters i body
+- Tworzy strukturę payload: `{ headers: {...}, parameters: {...}, body: "..." }`
+- Oblicza HMAC-SHA256 i koduje jako Base64
+
+### Webhook Notifications (verifyNotification)  
+- Używa prostszego schematu: bezpośredni HMAC-SHA256 z surowego body
+- Weryfikuje podpis z nagłówka `Signature`
+
+```javascript
+// Przykład manualnej weryfikacji (nie trzeba - robiąc automatycznie):
+const crypto = require('crypto');
+const hmac = crypto.createHmac('sha256', signatureKey);
+hmac.update(webhookBody, 'utf8');
+const calculatedSignature = hmac.digest('base64');
 ```
 
 ## 🧪 Testowanie

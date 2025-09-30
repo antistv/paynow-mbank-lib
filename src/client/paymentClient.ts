@@ -65,7 +65,18 @@ export class PaynowClient {
     try {
       const idempotencyKey = uuidv4();
       const requestData = JSON.stringify(paymentRequest);
-      const signature = this.signatureCalculator.calculateSignature(requestData);
+      
+      // Przygotuj headers do podpisu (w kolejności alfabetycznej)
+      const signatureHeaders = {
+        'Api-Key': this.apiKey,
+        'Idempotency-Key': idempotencyKey,
+      };
+      
+      const signature = this.signatureCalculator.calculateSignature(
+        signatureHeaders, 
+        {}, // brak parametrów query dla POST /payments
+        requestData
+      );
 
       const response = await this.apiClient.post('/payments', paymentRequest, {
         headers: {
@@ -73,7 +84,7 @@ export class PaynowClient {
           'Idempotency-Key': idempotencyKey,
         },
       });
-
+      
       return {
         paymentId: response.data.paymentId,
         redirectUrl: response.data.redirectUrl,
