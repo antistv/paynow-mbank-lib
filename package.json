@@ -1,0 +1,62 @@
+{
+  "name": "paynow-mbank-lib",
+  "version": "0.1.0",
+  "description": "Nieoficjalna biblioteka Node.js do integracji z Paynow (mBank)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "version": "npm run build",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antistv/paynow-mbank-lib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/antistv/paynow-mbank-lib/issues"
+  },
+  "homepage": "https://github.com/antistv/paynow-mbank-lib#readme",
+  "keywords": [
+    "paynow",
+    "mbank",
+    "payment",
+    "gateway",
+    "nodejs",
+    "typescript",
+    "poland",
+    "płatności"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.6.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
