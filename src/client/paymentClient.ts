@@ -1,21 +1,41 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  PaynowConfig, 
-  PaymentRequest, 
-  PaymentResponse, 
+import {
+  PaynowConfig,
+  PaymentRequest,
+  PaymentResponse,
   PaymentStatusResponse,
   PaymentNotification,
   PaynowApiError
 } from '../types';
 import { SignatureCalculator } from '../utils/signatureCalculator';
 
+/**
+ * Główny klient do komunikacji z API Paynow.
+ * Zapewnia metody tworzenia płatności, pobierania statusu oraz walidacji i parsowania powiadomień.
+ * 
+ * Przykład użycia:
+ * ```ts
+ * const client = new PaynowClient({ apiKey: 'xxx', signatureKey: 'yyy', environment: 'sandbox' });
+ * const payment = await client.createPayment({
+ *   amount: 1000,
+ *   externalId: 'order-123',
+ *   description: 'Zamówienie #123',
+ *   buyer: { email: 'test@example.com' }
+ * });
+ * console.log(payment.redirectUrl);
+ * ```
+ */
 export class PaynowClient {
   private apiClient: AxiosInstance;
   private apiKey: string;
   private signatureCalculator: SignatureCalculator;
   private environment: 'sandbox' | 'production';
 
+  /**
+   * Inicjalizuje klienta Paynow.
+   * @param config Konfiguracja dostępu (klucze + środowisko)
+   */
   constructor(config: PaynowConfig) {
     this.apiKey = config.apiKey;
     this.environment = config.environment || 'sandbox';
@@ -36,7 +56,10 @@ export class PaynowClient {
   }
 
   /**
-   * Tworzy nową płatność w systemie Paynow
+   * Tworzy nową płatność w systemie Paynow.
+   * @param paymentRequest Dane płatności (kwota w groszach, opis, dane kupującego itd.)
+   * @returns Id utworzonej płatności + status + opcjonalny URL przekierowania
+   * @throws Error gdy API zwróci błąd lub wystąpi problem sieciowy
    */
   async createPayment(paymentRequest: PaymentRequest): Promise<PaymentResponse> {
     try {
@@ -62,7 +85,9 @@ export class PaynowClient {
   }
 
   /**
-   * Pobiera status płatności
+   * Pobiera aktualny status płatności.
+   * @param paymentId Id płatności zwrócone z createPayment
+   * @returns Pełny obiekt statusu płatności
    */
   async getPaymentStatus(paymentId: string): Promise<PaymentStatusResponse> {
     try {
@@ -74,14 +99,20 @@ export class PaynowClient {
   }
 
   /**
-   * Weryfikuje powiadomienie od Paynow
+   * Weryfikuje podpis powiadomienia webhook od Paynow.
+   * @param signature Wartość nagłówka `Signature`
+   * @param notificationData Surowe body JSON (string) otrzymane w webhooku
+   * @returns true jeśli podpis jest poprawny
    */
   verifyNotification(signature: string, notificationData: string): boolean {
     return this.signatureCalculator.verifySignature(signature, notificationData);
   }
 
   /**
-   * Parsuje powiadomienie od Paynow
+   * Parsuje treść powiadomienia webhook do struktury typowanej.
+   * Wcześniej upewnij się, że podpis jest zweryfikowany.
+   * @param notificationData Surowe body JSON
+   * @throws Error jeśli JSON jest niepoprawny
    */
   parseNotification(notificationData: string): PaymentNotification {
     try {
@@ -92,7 +123,8 @@ export class PaynowClient {
   }
 
   /**
-   * Obsługuje błędy API
+   * Normalizuje błędy HTTP/Axios do instancji Error z czytelnym komunikatem.
+   * @internal
    */
   private handleError(error: unknown): Error {
     if (axios.isAxiosError(error)) {

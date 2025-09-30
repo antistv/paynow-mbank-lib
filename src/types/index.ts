@@ -1,5 +1,9 @@
-// Paynow API Types based on official documentation
+// Paynow API Types based on public documentation (model uproszczony pod bibliotekę)
+// Wszystkie kwoty: w groszach (integer). Daty jako ISO string.
 
+/**
+ * Konfiguracja klienta Paynow
+ */
 export interface PaynowConfig {
   apiKey: string;
   signatureKey: string;
