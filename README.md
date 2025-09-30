@@ -111,34 +111,71 @@ Parsuje dane powiadomienia od Paynow.
 ### Typy danych
 
 ```typescript
-interface PaynowConfig {
+export interface PaynowConfig {
   apiKey: string;
   signatureKey: string;
   environment?: 'sandbox' | 'production';
 }
 
-interface PaymentRequest {
-  amount: number; // w groszach
-  externalId: string | number;
-  description: string;
-  buyer: PaymentBuyer;
-  continueUrl?: string;
-  currency?: 'PLN';
-}
-
-interface PaymentBuyer {
+export interface PaymentBuyer {
   email: string;
   firstName?: string;
   lastName?: string;
-  phone?: string;
+  phone?: {
+    prefix: string; // e.g., "+48"
+    number: string; // e.g., "123456789"
+  };
+  address?: {
+    billing?: {
+      street?: string;
+      houseNumber?: string;
+      apartmentNumber?: string;
+      zipcode?: string;
+      city?: string;
+      county?: string;
+      country?: string; // e.g., "PL"
+    };
+    shipping?: {
+      street?: string;
+      houseNumber?: string;
+      apartmentNumber?: string;
+      zipcode?: string;
+      city?: string;
+      county?: string;
+      country?: string; // e.g., "PL"
+    };
+  };
+  locale?: string; // e.g., "pl", "en" default is "pl-PL"
+  externalId?: string | number; // optional buyer ID
 }
 
-enum PaymentStatus {
+export interface OrderItem {
+  name: string;
+  producer?: string;
+  category: string;
+  quantity: number;
+  price: number; // cena w groszach
+}
+
+export interface PaymentRequest {
+  amount: number; // w groszach (np. 1000 = 10.00 PLN)
+  externalId: string | number;
+  description: string;
+  buyer: PaymentBuyer;
+  continueUrl?: string; // URL powrotu z płatności
+  currency?: 'PLN' | 'EUR' | 'USD' | 'GBP'; // domyślnie 'PLN'
+  validityTime?: number; // ważność płatności w sekundach
+  orderItems?: OrderItem[];
+}
+
+export enum PaymentStatus {
   NEW = 'NEW',
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
   REJECTED = 'REJECTED',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
+  EXPIRED = 'EXPIRED',
+  ABANDONED = 'ABANDONED',
 }
 ```
 
@@ -159,7 +196,7 @@ npm test -- --coverage
 
 ```bash
 # Sklonuj repozytorium
-git clone https://github.com/yourusername/paynow-mbank-lib.git
+git clone https://github.com/antistv/paynow-mbank-lib.git
 
 # Zainstaluj zależności
 npm install
@@ -194,5 +231,5 @@ MIT License - zobacz [LICENSE](LICENSE) po szczegóły.
 
 - [Oficjalna dokumentacja Paynow](https://docs.paynow.pl/)
 - [Paynow Sandbox](https://panel.sandbox.paynow.pl/)
-- [Issues](https://github.com/yourusername/paynow-mbank-lib/issues)
+- [Issues](https://github.com/antistv/paynow-mbank-lib/issues)
 - [NPM Package](https://www.npmjs.com/package/paynow-mbank-lib)
