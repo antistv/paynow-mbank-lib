@@ -86,7 +86,7 @@ export class PaynowClient {
   parseNotification(notificationData: string): PaymentNotification {
     try {
       return JSON.parse(notificationData) as PaymentNotification;
-    } catch (error) {
+    } catch {
       throw new Error('Invalid notification data format');
     }
   }
